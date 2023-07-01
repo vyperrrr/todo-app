@@ -1,42 +1,31 @@
-import React, { useRef, useState } from 'react';
-
-function TodoList({ todos, onRemove }) {
-  return (
-    <>
-      {todos.map((todo, index) => (
-        <Todo key={index} todo={todo} index={index} onRemove={onRemove} />
-      ))}
-    </>
-  );
-}
-
-function Todo({ todo, index, onRemove }) {
-  const handleCheckboxChange = () => {
-    onRemove(index);
-  };
-
-  return (
-    <div>
-      <input type="checkbox" onChange={handleCheckboxChange} />
-      <label>{todo}</label>
-    </div>
-  );
-}
+import React, { useRef, useState, useEffect } from 'react';
+import { TodoList } from './components/TodoList';
 
 function App() {
-  const [todos, setTodos] = useState([]);
+  const storedTodos = JSON.parse(localStorage.getItem('todos'));
+  const [todos, setTodos] = useState(storedTodos || []);
+  const [item_counter, setCounter] = useState(0);
   const inputRef = useRef(null);
 
   function handleClick() {
-    if (inputRef.current.value !== "") {
-      setTodos([...todos, inputRef.current.value]);
-      inputRef.current.value = "";
+    if (inputRef.current.value.trim().length !== 0) {
+      const newTodo = {
+        id: item_counter,
+        text: inputRef.current.value,
+      };
+      setTodos([...todos, newTodo]);
+      inputRef.current.value = '';
+      setCounter(prevCounter => prevCounter + 1)
     }
-  };
+  }
 
-  function handleRemove(index) {
-    setTodos((prevTodos) => prevTodos.filter((_, i) => i !== index));
-  };
+  function handleRemove(id) {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  }
+
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
 
   return (
     <div>
